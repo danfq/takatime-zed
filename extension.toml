@@ -1,7 +1,7 @@
 id = "takatime"
 name = "TakaTime"
 description = "Track your coding time with TakaTime."
-version = "0.1.0"
+version = "1.0.0"
 schema_version = 1
 authors = ["DanFQ <dan@danfq.dev>"]
 repository = "https://github.com/danfq/takatime-zed"
