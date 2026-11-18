@@ -234,4 +234,4 @@ Pushing a version change to `main` publishes `takatime-ls` to npm, creates a Git
 
 ## 📄 License
 
-[AGPL-3.0](LICENSE)
+[GPL-3.0](LICENSE)
