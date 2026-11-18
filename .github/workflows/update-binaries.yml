@@ -1,0 +1,104 @@
+name: Update binaries
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [takatime-release]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-binaries
+
+env:
+  UPSTREAM: Rtarun3606k/TakaTime
+  VERSION_FILE: takatime-ls/src/lib/internal/binary-version.json
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Resolve latest upstream release
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh release view -R "$UPSTREAM" --json tagName -q .tagName)
+          current=$(jq -r .version "$VERSION_FILE")
+
+          # same or older
+          if [ "$(printf '%s\n' "$current" "$latest" | sort -V | tail -1)" = "$current" ]; then
+            echo "::notice::already on $current"
+            exit 0
+          fi
+
+          # upstream publishes the release before its assets
+          assets=$(gh release view "$latest" -R "$UPSTREAM" --json assets -q '.assets[].name')
+          for bin in taka-upload taka-dashboard; do
+            for target in linux-amd64 darwin-amd64 darwin-arm64 windows-amd64.exe; do
+              if ! grep -qx "$bin-$target" <<<"$assets"; then
+                echo "::notice::$latest is missing $bin-$target, retrying on the next run"
+                exit 0
+              fi
+            done
+          done
+
+          echo "tag=$latest" >>"$GITHUB_OUTPUT"
+
+      - name: Check binary flags
+        if: steps.upstream.outputs.tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          dir=$(mktemp -d)
+          gh release download "$TAG" -R "$UPSTREAM" -D "$dir" \
+            -p taka-upload-linux-amd64 -p taka-dashboard-linux-amd64
+          chmod +x "$dir"/*
+
+          # go's flag package exits 2 on -h
+          check() {
+            local help
+            help=$("$dir/$1-linux-amd64" -h 2>&1 || true)
+            shift
+            for flag in "$@"; do
+              if ! grep -qE -- "^\s*-$flag(\s|$)" <<<"$help"; then
+                echo "::error::$TAG dropped -$flag, update the language server before bumping"
+                exit 1
+              fi
+            done
+          }
+
+          check taka-upload file project uri duration editor
+          check taka-dashboard MongoDBString
+
+      - name: Bump versions
+        id: bump
+        if: steps.upstream.outputs.tag
+        env:
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          jq --arg version "$TAG" '.version = $version' "$VERSION_FILE" >tmp.json
+          mv tmp.json "$VERSION_FILE"
+          echo "version=$(scripts/bump-version.sh patch)" >>"$GITHUB_OUTPUT"
+
+      - name: Commit and release
+        if: steps.upstream.outputs.tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.upstream.outputs.tag }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(deps): bump takatime binaries to $TAG" -m "bumps the extension to $VERSION"
+          git push
+
+          # pushes from github.token don't trigger workflows, dispatch does
+          gh workflow run release.yml --ref main
