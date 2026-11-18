@@ -11,7 +11,7 @@ Your editor, your database, your data.
 <br>
 
 [![npm](https://img.shields.io/npm/v/takatime-ls?style=for-the-badge&logo=npm&logoColor=white&label=takatime-ls&color=CB3837)](https://www.npmjs.com/package/takatime-ls)
-[![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPL--3.0--only-blue?style=for-the-badge)](LICENSE)
 [![Zed](https://img.shields.io/badge/Zed-Extension-084CCF?style=for-the-badge&logo=zedindustries&logoColor=white)](https://zed.dev/extensions)
 
 ![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)
@@ -57,14 +57,14 @@ TakaTime reads its settings from `~/.takatime.json`, shared with every other Tak
 
 ```json
 {
-    "MONGO_URI": "mongodb://user:password@your-host:27017/takatime?authSource=takatime",
-    "VERSION": "v2.3.1"
+  "MONGO_URI": "mongodb://user:password@your-host:27017/takatime?authSource=takatime",
+  "VERSION": "v2.3.1"
 }
 ```
 
-| Key         | Description                                                                   |
-| ----------- | ----------------------------------------------------------------------------- |
-| `MONGO_URI` | Your MongoDB connection string (`mongodb://` or `mongodb+srv://`).            |
+| Key         | Description                                                                     |
+| ----------- | ------------------------------------------------------------------------------- |
+| `MONGO_URI` | Your MongoDB connection string (`mongodb://` or `mongodb+srv://`).              |
 | `VERSION`   | The TakaTime binary version in use. Managed automatically, no need to touch it. |
 
 Changes are picked up within a few seconds, without restarting Zed.
@@ -163,12 +163,12 @@ Only the file path, project name, duration, editor name and timestamp. **File co
 
 ## 🩺 Troubleshooting
 
-| Problem                                 | Fix                                                                                            |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| "Set MONGO_URI" notification            | Add your connection string to `~/.takatime.json`.                                               |
-| "Isn't a valid MongoDB connection string" | The URI must start with `mongodb://` or `mongodb+srv://`.                                     |
-| "Couldn't install binaries"             | Check your connection. TakaTime retries every 5 minutes on its own.                             |
-| No time showing up                      | Run `dev: open language server logs`, pick `takatime` and look for `takatime active`.          |
+| Problem                                   | Fix                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| "Set MONGO_URI" notification              | Add your connection string to `~/.takatime.json`.                                     |
+| "Isn't a valid MongoDB connection string" | The URI must start with `mongodb://` or `mongodb+srv://`.                             |
+| "Couldn't install binaries"               | Check your connection. TakaTime retries every 5 minutes on its own.                   |
+| No time showing up                        | Run `dev: open language server logs`, pick `takatime` and look for `takatime active`. |
 
 ## 🛠️ Development
 

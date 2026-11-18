@@ -1,13 +1,13 @@
 {
   "name": "takatime-ls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TakaTime language server for Zed",
   "author": {
     "name": "DanFQ",
     "email": "dan@danfq.dev",
     "url": "https://danfq.dev"
   },
-  "license": "GPL-3.0",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/danfq/takatime-zed.git",
@@ -23,7 +23,8 @@
   "scripts": {
     "build": "bun build src/server.ts --target=node --format=cjs --outfile dist/server.js",
     "typecheck": "bun check",
-    "prepublishOnly": "bun run typecheck && bun run build"
+    "prepublishOnly": "bun run typecheck && bun run build",
+    "prepack": "cp ../README.md ../LICENSE ."
   },
   "devDependencies": {
     "@types/node": "^22",

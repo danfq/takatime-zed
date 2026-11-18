@@ -1,11 +1,11 @@
 id = "takatime"
 name = "TakaTime"
 description = "Track your coding time with TakaTime."
-version = "1.0.0"
+version = "1.0.1"
 schema_version = 1
 authors = ["DanFQ <dan@danfq.dev>"]
 repository = "https://github.com/danfq/takatime-zed"
-license = "GPL-3.0"
+license = "GPL-3.0-only"
 
 [language_servers.takatime]
 name = "TakaTime"
