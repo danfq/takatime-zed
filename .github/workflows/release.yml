@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: [extension.toml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check versions
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -nE 's/^version = "(.*)"$/\1/p' extension.toml | head -1)
+          cargo=$(sed -nE 's/^version = "(.*)"$/\1/p' Cargo.toml | head -1)
+          npm=$(jq -r .version takatime-ls/package.json)
+
+          if [ "$version" != "$cargo" ] || [ "$version" != "$npm" ]; then
+            echo "::error::version mismatch (extension.toml $version, Cargo.toml $cargo, package.json $npm)"
+            exit 1
+          fi
+
+          echo "version=$version" >>"$GITHUB_OUTPUT"
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "::notice::v$version is already released"
+          else
+            echo "release=true" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Build extension
+        if: steps.version.outputs.release
+        run: |
+          rustup toolchain install
+          cargo build --release --target wasm32-wasip2 --locked
+
+      - uses: oven-sh/setup-bun@v2
+        if: steps.version.outputs.release
+        with:
+          bun-version: 1.4.4
+
+      - uses: actions/setup-node@v5
+        if: steps.version.outputs.release
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish language server
+        if: steps.version.outputs.release
+        working-directory: takatime-ls
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # skip when a previous run already published
+          if npm view "takatime-ls@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::takatime-ls@$VERSION is already on npm"
+            exit 0
+          fi
+
+          # trusted publishing needs npm 11.5.1+
+          npm install -g npm@latest
+          bun install --frozen-lockfile
+          npm publish --access public
+
+      - name: Create GitHub release
+        if: steps.version.outputs.release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: gh release create "v$VERSION" --target "$GITHUB_SHA" --title "v$VERSION" --generate-notes
+
+      - name: Update Zed extension
+        if: steps.version.outputs.release
+        uses: huacnlee/zed-extension-action@v1
+        with:
+          extension-name: takatime
+          push-to: danfq/extensions
+          tag: v${{ steps.version.outputs.version }}
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
