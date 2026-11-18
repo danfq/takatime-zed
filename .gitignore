@@ -68,3 +68,5 @@ extension.wasm
 *.wasm
 **/*.rs.bk
 *.pdb
+/takatime-ls/LICENSE
+/takatime-ls/README.md
