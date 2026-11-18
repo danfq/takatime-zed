@@ -11,7 +11,7 @@ Your editor, your database, your data.
 <br>
 
 [![npm](https://img.shields.io/npm/v/takatime-ls?style=for-the-badge&logo=npm&logoColor=white&label=takatime-ls&color=CB3837)](https://www.npmjs.com/package/takatime-ls)
-[![License](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge)](LICENSE)
 [![Zed](https://img.shields.io/badge/Zed-Extension-084CCF?style=for-the-badge&logo=zedindustries&logoColor=white)](https://zed.dev/extensions)
 
 ![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)

@@ -7,7 +7,7 @@
     "email": "dan@danfq.dev",
     "url": "https://danfq.dev"
   },
-  "license": "AGPL-3.0-only",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/danfq/takatime-zed.git",
